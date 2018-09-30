@@ -31,7 +31,7 @@ This page is for monitoring the database.
 * **Keywords**: the keyword in the scroll bar.
 * **Bullets**: the feedback messages.
 
-##### Hide Keywords and Bullets
+### Hide Keywords and Bullets
 You can hide a **Keyword** or a **Bullet** or cancel hidden with the admin page.
 Hidden items will not appear in the user interface, just as if they are deleted.
 1. Select the items with the checkbox on the left.
