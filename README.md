@@ -26,7 +26,7 @@ It will not post anything to the backend so it's safe to open any number of it a
 Login is not required any more!
 
 ## Admin
-URL: <https://grainger-visitor.appspot.com/player> (Login required)\
+URL: <https://grainger-visitor.appspot.com/admin> (Login required)\
 This page is for monitoring the database.
 * **Keywords**: the keyword in the scroll bar.
 * **Bullets**: the feedback messages.
