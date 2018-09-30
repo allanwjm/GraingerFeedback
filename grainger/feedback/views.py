@@ -78,7 +78,7 @@ def api_get_status(request):
 
 @require_http_methods(['GET'])
 def api_get_lexicon(request):
-    return JsonResponse({'lexicon': [w.text for w in Keyword.objects.all()]})
+    return JsonResponse({'lexicon': [w.text for w in Keyword.objects.filter(hidden=False).all()]})
 
 
 @require_http_methods(['GET'])
@@ -87,7 +87,7 @@ def api_get_bullets(request):
         music_id = int(request.GET['musicid'])
         position = float(request.GET['position'])
         node_uuid = request.GET.get('uuid', '<unknown>')
-        bullets = Bullet.objects.filter(music_id=music_id, position__range=(position - 3, position))
+        bullets = Bullet.objects.filter(music_id=music_id, hidden=False, position__range=(position - 3, position))
         if bullets.count() > 30:
             bullets = random.sample(list(bullets), 30)
         bullets = [{

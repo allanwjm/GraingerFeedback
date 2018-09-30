@@ -37,6 +37,7 @@ class Bullet(models.Model):
     ])
     creator = models.CharField(blank=True, null=True, max_length=255)
     create_time = models.DateTimeField(auto_now_add=True)
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text
@@ -44,10 +45,11 @@ class Bullet(models.Model):
 
 class Keyword(models.Model):
     text = models.CharField(unique=True, blank=False, max_length=255)
-    weight = models.FloatField(default=1.0)
-    related_to_moments_of_congruence = models.BooleanField(default=True)
-    related_to_ceiling_of_clouds = models.BooleanField(default=True)
-    related_to_in_transition = models.BooleanField(default=True)
+    hidden = models.BooleanField(default=False)
+    # weight = models.FloatField(default=1.0)
+    # related_to_moments_of_congruence = models.BooleanField(default=True)
+    # related_to_ceiling_of_clouds = models.BooleanField(default=True)
+    # related_to_in_transition = models.BooleanField(default=True)
 
     def __str__(self):
         return self.text
