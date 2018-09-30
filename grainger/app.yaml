@@ -1,0 +1,18 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /static
+  static_dir: react/static/
+- url: /s
+  static_dir: static/
+- url: /.*
+  script: grainger.wsgi.application
+
+libraries:
+- name: django
+  version: 1.11
+
+- name: MySQLdb
+  version: 1.2.5

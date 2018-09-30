@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stillness | Perfection</title>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+  <!-- iPad metas -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="{% static 'favicon.ico' %}"/>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+  <link rel="stylesheet" href="{% static 'mejs/mediaelementplayer.min.css' %}"/>
+  <style>
+    body {
+      background: black;
+      color: white;
+      width: 100%;
+    }
+
+    header {
+      position: absolute;
+      top: 2vw;
+      left: 3vh;
+      z-index: 100;
+      opacity: .75;
+    }
+
+    header #logo-gm {
+      height: 6vw;
+      max-height: 3rem;
+    }
+
+    header #logo-sg {
+      height: 5.5vw;
+      max-height: 2.75rem;
+      margin-left: 2vh;
+    }
+
+    #playlist a {
+      color: white;
+      text-decoration: none;
+    }
+
+    #playlist a.active {
+      color: #ec6f96;
+    }
+
+    .music-title {
+      color: #ee7ba0;
+      text-transform: uppercase;
+      margin: .25rem;
+    }
+
+    p {
+      margin: .25rem;
+    }
+
+    hr {
+      border-top: 1px solid rgba(255, 255, 255, .2);
+    }
+
+    #text-input {
+      border-radius: 0;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <img id="logo-gm" src="{% static 'img/logo-grainger-museum.png' %}">
+  <img id="logo-sg" src="{% static 'img/logo-science-gallery.png' %}">
+</header>
+<div class="text-center" style="padding-top: 8vh;">
+  <h3 class="mb-0">
+    <nobr>Prefection | Stillness</nobr>
+  </h3>
+  <hr>
+  <div class="mb-2">
+    <h4 class="music-title">Ceiling of Clouds</h4>
+    <p>by Chris Pickering</p>
+    <audio controls preload="auto" src="/s/music/ceiling-of-clouds.mp3"></audio>
+  </div>
+  <div class="mb-2">
+    <h4 class="music-title">In Transition</h4>
+    <p>by Zinia Chan</p>
+    <audio controls preload="auto" src="/s/music/in-transition.mp3"></audio>
+  </div>
+  <div class="mb-2">
+    <h4 class="music-title">Moments of Congruence</h4>
+    <p>by Wayne Kington</p>
+    <audio controls preload="auto" src="/s/music/moments-of-congruence.mp3"></audio>
+  </div>
+  <hr>
+  <div class="px-3 pb-3 mx-auto" style="max-width: 20rem;">
+    <div id="prompt-alert" class="alert alert-success" role="alert">
+      Message sent!<br>
+      Check out the tablets in the Grainger Museum!
+    </div>
+    <input class="form-control mt-3 mb-2" id="text-input" type="text" placeholder="Say something...">
+    <h6 id="prompt-return">Tap Return to send</h6>
+  </div>
+</div>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'mejs/mediaelement-and-player.min.js' %}"></script>
+<script>
+    $(function () {
+        $('audio').on('playing', function (e) {
+            let self = e.target;
+            $('audio').each(function () {
+                if (this !== self) {
+                    this.pause();
+                    this.currentTime = 0;
+                }
+            })
+        });
+        $('#text-input').on('focus', function () {
+            $('#prompt-return').slideDown();
+            window.scrollTo(0, document.body.scrollHeight);
+        }).on('blur', function () {
+            $('#prompt-return').slideUp();
+        }).on('keypress', function (event) {
+            if (event.key === 'Enter') {
+                $.post("{% url 'api_new_bullet' %}", {
+                    text: this.value,
+                    color: '#ffffff',
+                    source: 2,
+                });
+                $('#prompt-alert').slideDown();
+                setTimeout(function () {
+                    $('#prompt-alert').slideUp();
+                }, 5000);
+                $(this)[0].value = '';
+                $(this).blur();
+                setTimeout(function () {
+                    window.scrollTo(0, document.body.scrollHeight);
+                }, 250);
+            }
+        });
+        $('#prompt-return').hide();
+        $('#prompt-alert').hide();
+    });
+</script>
+</body>
+</html>

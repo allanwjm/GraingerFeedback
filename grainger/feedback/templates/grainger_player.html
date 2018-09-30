@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfection Music Player</title>
+  <link rel="icon" href="{% static 'favicon.ico' %}"/>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"/>
+  <link rel="stylesheet" href="{% static 'mejs/mediaelementplayer.min.css' %}"/>
+  <style>
+    body {
+      background: black;
+      color: white;
+      height: 100vh;
+    }
+
+    header {
+      position: absolute;
+      top: 2vmin;
+      left: 3vmax;
+      z-index: 100;
+      opacity: .75;
+    }
+
+    header #logo-gm {
+      max-height: 6vmin;
+    }
+
+    header #logo-sg {
+      max-height: 5.5vmin;
+      margin-left: 2vmax;
+    }
+
+    #playlist a {
+      color: white;
+      text-decoration: none;
+    }
+
+    #playlist a.active {
+      color: #ec6f96;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <img id="logo-gm" src="{% static 'img/logo-grainger-museum.png' %}">
+  <img id="logo-sg" src="{% static 'img/logo-science-gallery.png' %}">
+</header>
+<div class="d-flex justify-content-center align-items-center h-100">
+  <div class="d-flex justify-content-center align-items-center">
+    <div>
+      <h2>Playlist</h2>
+      <ul id="playlist" class="list-inline"></ul>
+      <audio id="music-player" controls>
+        <source src="{% static musics.first.url %}" type="audio/mpeg">
+      </audio>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" value="" id="shuffle" checked>
+        <label class="form-check-label" for="shuffle">Shuffle</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" value="" id="loop" checked>
+        <label class="form-check-label" for="loop">Loop</label>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'mejs/mediaelement-and-player.min.js' %}"></script>
+{% csrf_token %}
+<script>
+  $(function () {
+    // Ajax csrf token
+    let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    let csrfSafeMethod = function (method) {
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    };
+    $.ajaxSetup({
+      beforeSend: function (xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+      }
+    });
+    // Aminate.css
+    $.fn.extend({
+      animateCss: function (animationName, callback) {
+        var animationEnd = (function (el) {
+          var animations = {
+            animation: 'animationend',
+            OAnimation: 'oAnimationEnd',
+            MozAnimation: 'mozAnimationEnd',
+            WebkitAnimation: 'webkitAnimationEnd',
+          };
+          for (var t in animations) {
+            if (el.style[t] !== undefined) {
+              return animations[t];
+            }
+          }
+        })(document.createElement('div'));
+        this.addClass('animated ' + animationName).one(animationEnd, function () {
+          $(this).removeClass('animated ' + animationName);
+          if (typeof callback === 'function') callback();
+        });
+        return this;
+      },
+    });
+    let currentIndex = 0;
+    let musics = {{ musics_json | safe }};
+    let player = $('#music-player')[0];
+    let play = function (i) {
+      if (i === undefined) {
+        i = currentIndex;
+      } else {
+        currentIndex = i;
+      }
+      let music = musics[i];
+      $('#playlist a').removeClass('active');
+      $('[href="' + music.url + '"]').addClass('active');
+
+      player.setSrc(music.url);
+      player.load();
+      player.play();
+    };
+    $.each(musics, function (i) {
+      $('<li><h5><a class="music-item"></a></h5></li>')
+        .appendTo('#playlist')
+        .find('a')
+        .attr('href', this.url)
+        .text((i + 1) + '. ' + this.title)
+        .click(function (e) {
+          e.preventDefault();
+          play(i);
+        });
+    });
+    $('audio').mediaelementplayer({
+      shimScriptAccess: 'always',
+    }).on('ended', function () {
+      if ($('#loop').prop('checked')) {
+        if ($('#shuffle').prop('checked')) {
+          // Shuffle
+          let i = currentIndex;
+          while (i === currentIndex) {
+            i = Math.floor(Math.random() * musics.length);
+          }
+          play(i);
+        } else {
+          // Simply loop
+          currentIndex += 1;
+          if (currentIndex >= musics.length) {
+            currentIndex = 0;
+          }
+          play();
+        }
+      }
+    });
+    setInterval(function () {
+      let url = '/post/player-update';
+      $.post(url, {
+        music_id: musics[currentIndex].id,
+        title: musics[currentIndex].title,
+        paused: player.paused,
+        position: player.currentTime
+      });
+    }, {{ request_interval }});
+    $('.music-item').first().click();
+  });
+</script>
+</body>
+</html>
